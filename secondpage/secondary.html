@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mini Pong Game</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pong" width="800" height="400"></canvas>
+
+    <script>
+        // Get the canvas element
+        const canvas = document.getElementById("pong");
+        const context = canvas.getContext("2d");
+    
+        // Create the pong paddles
+        const paddleWidth = 10, paddleHeight = 100;
+        const player = {
+            x: 0,
+            y: canvas.height / 2 - paddleHeight / 2,
+            width: paddleWidth,
+            height: paddleHeight,
+            color: "#000",
+            dy: 10
+        };
+        const player2 = {
+            x: canvas.width - paddleWidth,
+            y: canvas.height / 2 - paddleHeight / 2,
+            width: paddleWidth,
+            height: paddleHeight,
+            color: "#000",
+            dy: 10
+        };
+    
+        // Create the pong ball
+        const ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 10,
+            speed: 2,
+            dx: 2,
+            dy: 2,
+            color: "#000"
+        };
+    
+        // Draw the paddle
+        function drawRect(x, y, width, height, color) {
+            context.fillStyle = color;
+            context.fillRect(x, y, width, height);
+        }
+    
+        // Draw the ball
+        function drawCircle(x, y, radius, color) {
+            context.beginPath();
+            context.arc(x, y, radius, 0, Math.PI * 2, false);
+            context.fillStyle = color;
+            context.fill();
+        }
+    
+        // Move the paddle
+        function movePaddle(paddle, upKey, downKey) {
+            document.addEventListener("keydown", function(event) {
+                switch(event.keyCode) {
+                    case upKey:
+                        paddle.y -= paddle.dy;
+                        break;
+                    case downKey:
+                        paddle.y += paddle.dy;
+                        break;
+                }
+            });
+        }
+    
+        // Move the paddles
+        movePaddle(player, 87, 83); // W and S for player 1
+        movePaddle(player2, 38, 40); // ArrowUp and ArrowDown for player 2
+    
+        // Update the game
+        function update() {
+            // Clear the canvas
+            context.clearRect(0, 0, canvas.width, canvas.height);
+    
+            // Draw the paddles
+            drawRect(player.x, player.y, player.width, player.height, player.color);
+            drawRect(player2.x, player2.y, player2.width, player2.height, player2.color);
+    
+            // Draw the ball
+            drawCircle(ball.x, ball.y, ball.radius, ball.color);
+    
+            // Move the ball
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+    
+            // Ball and wall collision detection
+            if(ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+                ball.dy *= -1; // change direction
+            }
+    
+            // Ball and paddle collision detection
+            if(ball.y + ball.radius > player.y && ball.y - ball.radius < player.y + player.height && ball.dx < 0) {
+                if(ball.x - ball.radius < player.x + player.width) {
+                    ball.dx *= -1;
+                }
+            }
+    
+            if(ball.y + ball.radius > player2.y && ball.y - ball.radius < player2.y + player2.height && ball.dx > 0) {
+                if(ball.x + ball.radius > player2.x) {
+                    ball.dx *= -1;
+                }
+            }
+    
+            // Update paddle positions
+            if(player.y < 0) player.y = 0;
+            if(player.y > canvas.height - player.height) player.y = canvas.height - player.height;
+            if(player2.y < 0) player2.y = 0;
+            if(player2.y > canvas.height - player2.height) player2.y = canvas.height - player2.height;
+        }
+    
+        // Game loop
+        function gameLoop() {
+            update();
+            requestAnimationFrame(gameLoop);
+        }
+    
+        // Start the game loop
+        gameLoop();
+    </script>
+</body>
+</html>

@@ -67,10 +67,8 @@ fn using_serve_dir_with_handler_as_service() -> Router {
 
 
     Router::new()
-        .route_service("/mainpage", ServeDir::new("mainpage"))
-        .route_service("/dist", ServeDir::new("dist"))
-        .route_service("/assets/second.html", ServeDir::new("second"))
-        .route_service("/foo", ServeFile::new("mainpage/index.html"))
+        .route_service("/root", ServeFile::new("assets/index.html"))
+        .route_service("/second",ServeFile::new("secondpage/secondary.html"))
         .fallback_service(ServeFile::new("assets/404.html"))
 
 
