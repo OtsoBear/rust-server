@@ -26,48 +26,18 @@ async fn main() {
         .init();
 
     tokio::join!(
-        serve(using_serve_dir(), 3001),
-        serve(using_serve_dir_with_assets_fallback(), 3002),
-        serve(using_serve_dir_only_from_root_via_fallback(), 3003),
-        serve(using_serve_dir_with_handler_as_service(), 3004),
-        serve(two_serve_dirs(), 3005),
-        serve(calling_serve_dir_from_a_handler(), 3006),
-        serve(using_serve_file_from_a_route(), 3307),
+        serve(using_serve_dir_with_handler_as_service(), 3000),
+        serve(calling_serve_dir_from_a_handler(), 3001),
     );
 }
 
-fn using_serve_dir() -> Router {
-    // serve the file in the "assets" directory under `/assets`
-    Router::new().nest_service("/assets", ServeDir::new("assets"))
-}
 
-fn using_serve_dir_with_assets_fallback() -> Router {
-    // `ServeDir` allows setting a fallback if an asset is not found
-    // so with this `GET /assets/doesnt-exist.jpg` will return `index.html`
-    // rather than a 404
-    let serve_dir = ServeDir::new("assets").not_found_service(ServeFile::new("assets/index.html"));
-
-    Router::new()
-        .route("/foo", get(|| async { "Hi from /foo" }))
-        .nest_service("/assets", serve_dir.clone())
-        .fallback_service(serve_dir)
-}
-
-fn using_serve_dir_only_from_root_via_fallback() -> Router {
-    // you can also serve the assets directly from the root (not nested under `/assets`)
-    // by only setting a `ServeDir` as the fallback
-    let serve_dir = ServeDir::new("assets").not_found_service(ServeFile::new("assets/index.html"));
-
-    Router::new()
-        .route("/foo", get(|| async { "Hi from /foo" }))
-        .fallback_service(serve_dir)
-}
 
 fn using_serve_dir_with_handler_as_service() -> Router {
 
 
     Router::new()
-        .route_service("/root", ServeFile::new("assets/index.html"))
+        .route_service("/", ServeFile::new("assets/index.html"))
         .route_service("/second",ServeFile::new("secondpage/secondary.html"))
         .fallback_service(ServeFile::new("assets/404.html"))
 
@@ -75,13 +45,6 @@ fn using_serve_dir_with_handler_as_service() -> Router {
     
 }
 
-fn two_serve_dirs() -> Router {
-
-
-    Router::new()
-        .nest_service("/assets", ServeDir::new("assets"))
-        .nest_service("/dist", ServeDir::new("dist"))
-}
 
 #[allow(clippy::let_and_return)]
 fn calling_serve_dir_from_a_handler() -> Router {
@@ -97,9 +60,7 @@ fn calling_serve_dir_from_a_handler() -> Router {
     )
 }
 
-fn using_serve_file_from_a_route() -> Router {
-    Router::new().route_service("/foo", ServeFile::new("assets/index.html"))
-}
+
 
 async fn serve(app: Router, port: u16) {
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
