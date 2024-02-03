@@ -1,11 +1,5 @@
-//! Run with
-//!
-//! ```not_rust
-//! cargo run -p example-static-file-server
-//! ```
-
 use axum::{
-    extract::Request, handler::HandlerWithoutStateExt, http::StatusCode, routing::get, Router,
+    extract::Request, routing::get, Router,
 };
 use std::net::SocketAddr;
 use tower::ServiceExt;
